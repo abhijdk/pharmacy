@@ -1,15 +1,21 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom'; 
 import { THEME } from '../../constants/theme';
 import { cn } from '../../utils/cn';
-import { LayoutDashboard, User, Settings, LogOut, X } from 'lucide-react';
+// Notice how we only have ONE import line for lucide-react now, containing Package!
+import { LayoutDashboard, User, Settings, LogOut, X, Package } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext'; 
 
 const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+  { name: 'Inventory', icon: Package, path: '/inventory' },
   { name: 'Profile', icon: User, path: '/profile' },
   { name: 'Settings', icon: Settings, path: '/settings' },
 ];
 
 export function Sidebar({ isOpen, onClose }) {
+  const { logout } = useAuth(); 
+
   return (
     <>
       {/* Mobile Backdrop Overlay */}
@@ -27,7 +33,6 @@ export function Sidebar({ isOpen, onClose }) {
         isOpen ? 'translate-x-0 flex' : '-translate-x-full hidden'
       )}>
         <div>
-          {/* Logo Area */}
           <div className="flex h-16 items-center justify-between px-6 border-b border-white/[0.08]">
             <span className={THEME.styles.headingPremium}>CRED.SYS</span>
             <button onClick={onClose} className="lg:hidden text-gray-400 hover:text-white">
@@ -35,23 +40,33 @@ export function Sidebar({ isOpen, onClose }) {
             </button>
           </div>
 
-          {/* Navigation Links */}
+          {/* Navigation Links using NavLink for Active States */}
           <nav className="flex flex-col gap-2 p-4 mt-4">
             {navItems.map((item) => (
-              <button
+              <NavLink
                 key={item.name}
-                className="flex items-center gap-3 px-4 py-3 text-sm font-medium tracking-wide text-gray-400 rounded-lg hover:bg-white/[0.05] hover:text-light transition-all duration-200 w-full text-left"
+                to={item.path}
+                onClick={() => onClose()} 
+                className={({ isActive }) => cn(
+                  "flex items-center gap-3 px-4 py-3 text-sm font-medium tracking-wide rounded-lg transition-all duration-200",
+                  isActive 
+                    ? "bg-white/[0.1] text-light border border-white/[0.1]" 
+                    : "text-gray-400 hover:bg-white/[0.05] hover:text-light"
+                )}
               >
                 <item.icon size={18} />
                 {item.name}
-              </button>
+              </NavLink>
             ))}
           </nav>
         </div>
 
         {/* Logout Area */}
         <div className="p-4 border-t border-white/[0.08]">
-          <button className="flex items-center gap-3 px-4 py-3 text-sm font-medium tracking-wide text-gray-400 rounded-lg hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 w-full text-left">
+          <button 
+            onClick={logout} 
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium tracking-wide text-gray-400 rounded-lg hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 w-full text-left"
+          >
             <LogOut size={18} />
             Secure Logout
           </button>
