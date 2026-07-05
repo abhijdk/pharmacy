@@ -1,16 +1,12 @@
 package com.backend.userAndSecurityManagement.security.config;
 
-import com.backend.userAndSecurityManagement.security.CustomUserDetailsService;
-import com.backend.userAndSecurityManagement.security.JwtAuthenticationFilter;
-import lombok.RequiredArgsConstructor;
+import com.backend.userAndSecurityManagement.security.JwtRequestFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,49 +14,47 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
-@RequiredArgsConstructor
+@EnableMethodSecurity // CRITICAL: This is required to make your @PreAuthorize annotations actually work!
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthFilter;
-    private final CustomUserDetailsService userDetailsService;
+    private final JwtRequestFilter jwtRequestFilter;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        // --- FIX IS HERE ---
-        // Pass the userDetailsService directly into the constructor
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
+        this.jwtRequestFilter = jwtRequestFilter;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless REST APIs
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // --- THE FIX IS HERE ---
-                        // Only allow exact paths for login and register.
-                        // Do NOT use the /** wildcard here.
-                        .requestMatchers("/home", "/api/auth/login").permitAll()
 
-                        // Everything else (including /api/auth/users) requires a token!
+                        // TIER 1: PUBLIC ACCESS (No login required)
+                        .requestMatchers("/api/auth/login").permitAll()
+
+                        // TIER 2: ADMIN ONLY ACCESS (Double protection alongside your @PreAuthorize)
+                        .requestMatchers("/api/auth/register", "/api/auth/users/**").hasRole("ADMIN")
+
+                        // TIER 3: EVERYONE ELSE (Must be logged in, but any role is accepted)
+                        // This covers everything else in your app that you haven't explicitly listed above.
                         .anyRequest().authenticated()
-                )
-                .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                );
+
+        // Add your JWT filter before the standard Spring authentication filter
+        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+    // 1. Defines the Password Hashing Algorithm (BCrypt is the industry standard)
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    // 2. Exposes the AuthenticationManager so AuthController can use it for login
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 }

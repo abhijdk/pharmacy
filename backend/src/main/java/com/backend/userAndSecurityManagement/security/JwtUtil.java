@@ -57,12 +57,13 @@ public class JwtUtil {
                 .compact();
     }
 
-    // Validate token
-    public boolean isTokenValid(String token, UserDetails userDetails) {
+    // Validate token against user details
+    public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
+    // Check if the current date is after the token's expiration date
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
