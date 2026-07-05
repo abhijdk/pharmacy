@@ -1,0 +1,382 @@
+### Final Pharmacy Store Management System Schema (Future Ready + Multi Branch)
+
+#### 1. USER & SECURITY MANAGEMENT
+
+```text
+roles
+├─ id (PK)
+├─ role_name
+├─ description
+
+permissions
+├─ id (PK)
+├─ permission_name
+├─ module
+
+role_permissions
+├─ id (PK)
+├─ role_id (FK)
+├─ permission_id (FK)
+
+users
+├─ id (PK)
+├─ branch_id (FK)
+├─ username
+├─ password_hash
+├─ full_name
+├─ mobile
+├─ email
+├─ status
+
+user_roles
+├─ id (PK)
+├─ user_id (FK)
+├─ role_id (FK)
+```
+
+---
+
+#### 2. MASTER DATA
+
+```text
+categories
+├─ id (PK)
+├─ category_name
+
+manufacturers
+├─ id (PK)
+├─ manufacturer_name
+
+generic_names
+├─ id (PK)
+├─ generic_name
+
+suppliers
+├─ id (PK)
+├─ supplier_name
+
+customers
+├─ id (PK)
+├─ customer_name
+
+doctors
+├─ id (PK)
+├─ doctor_name
+├─ specialization
+```
+
+---
+
+#### 3. MEDICINE MANAGEMENT
+
+```text
+medicines
+├─ id (PK)
+├─ category_id (FK)
+├─ manufacturer_id (FK)
+├─ generic_name_id (FK)
+├─ medicine_name
+├─ hsn_code
+├─ cgst
+├─ sgst
+
+medicine_batches
+├─ id (PK)
+├─ medicine_id (FK)
+├─ batch_no
+├─ mfg_date
+├─ exp_date
+├─ purchase_rate
+├─ mrp
+
+stock_transactions
+├─ id (PK)
+├─ branch_id (FK)
+├─ medicine_batch_id (FK)
+├─ transaction_type
+├─ qty
+├─ reference_type
+├─ reference_id
+```
+
+---
+
+#### 4. PURCHASE MANAGEMENT
+
+```text
+purchase_orders
+├─ id (PK)
+├─ supplier_id (FK)
+├─ branch_id (FK)
+├─ po_no
+
+purchase_order_items
+├─ id (PK)
+├─ purchase_order_id (FK)
+├─ medicine_id (FK)
+├─ qty
+├─ rate
+
+purchase_returns
+├─ id (PK)
+├─ purchase_order_id (FK)
+
+purchase_return_items
+├─ id (PK)
+├─ purchase_return_id (FK)
+├─ medicine_batch_id (FK)
+├─ qty
+```
+
+---
+
+#### 5. SALES MANAGEMENT
+
+```text
+sales_invoices
+├─ id (PK)
+├─ invoice_no
+├─ customer_id (FK)
+├─ doctor_id (FK)
+├─ branch_id (FK)
+
+sales_invoice_items
+├─ id (PK)
+├─ sales_invoice_id (FK)
+├─ medicine_batch_id (FK)
+├─ qty
+├─ rate
+
+sales_returns
+├─ id (PK)
+├─ sales_invoice_id (FK)
+
+sales_return_items
+├─ id (PK)
+├─ sales_return_id (FK)
+├─ medicine_batch_id (FK)
+├─ qty
+```
+
+---
+
+#### 6. PRESCRIPTION MANAGEMENT
+
+```text
+prescriptions
+├─ id (PK)
+├─ customer_id (FK)
+├─ doctor_id (FK)
+├─ prescription_date
+
+prescription_items
+├─ id (PK)
+├─ prescription_id (FK)
+├─ medicine_id (FK)
+├─ dosage
+├─ duration
+```
+
+---
+
+#### 7. ACCOUNTS & FINANCE MANAGEMENT
+
+```text
+payments
+├─ id (PK)
+├─ branch_id (FK)
+├─ payment_mode
+├─ amount
+
+expenses
+├─ id (PK)
+├─ branch_id (FK)
+├─ expense_category
+├─ amount
+
+ledger_accounts
+├─ id (PK)
+├─ ledger_name
+├─ ledger_type
+
+ledger_transactions
+├─ id (PK)
+├─ ledger_account_id (FK)
+├─ debit
+├─ credit
+├─ reference_type
+├─ reference_id
+```
+
+---
+
+#### 8. FUTURE / MULTI BRANCH MANAGEMENT
+
+```text
+branches
+├─ id (PK)
+├─ branch_name
+
+branch_stores
+├─ id (PK)
+├─ branch_id (FK)
+├─ store_name
+
+stock_transfer
+├─ id (PK)
+├─ from_branch_id (FK)
+├─ to_branch_id (FK)
+
+stock_transfer_items
+├─ id (PK)
+├─ stock_transfer_id (FK)
+├─ medicine_batch_id (FK)
+├─ qty
+
+online_orders
+├─ id (PK)
+├─ customer_id (FK)
+
+online_order_items
+├─ id (PK)
+├─ online_order_id (FK)
+├─ medicine_batch_id (FK)
+├─ qty
+```
+
+---
+
+#### 9. DOCTOR COMMISSION MANAGEMENT
+
+```text
+doctor_commission_slabs
+├─ id (PK)
+├─ doctor_id (FK)
+├─ commission_percent
+
+doctor_accounts
+├─ id (PK)
+├─ doctor_id (FK)
+├─ opening_balance
+
+doctor_commission_ledger
+├─ id (PK)
+├─ doctor_id (FK)
+├─ sales_invoice_id (FK)
+├─ commission_amount
+├─ paid_amount
+├─ balance_amount
+```
+
+---
+
+#### 10. STORE & INVENTORY MANAGEMENT
+
+```text
+stores
+├─ id (PK)
+├─ branch_id (FK)
+├─ store_name
+
+racks
+├─ id (PK)
+├─ store_id (FK)
+├─ rack_no
+
+shelves
+├─ id (PK)
+├─ rack_id (FK)
+├─ shelf_no
+
+medicine_stock_locations
+├─ id (PK)
+├─ medicine_batch_id (FK)
+├─ shelf_id (FK)
+├─ quantity
+```
+
+---
+
+#### 11. VENDOR MANAGEMENT
+
+```text
+vendors
+├─ id (PK)
+├─ supplier_id (FK)
+├─ vendor_name
+
+vendor_ledger
+├─ id (PK)
+├─ vendor_id (FK)
+├─ debit
+├─ credit
+├─ balance
+├─ reference_type
+├─ reference_id
+```
+
+---
+
+# Core Relationships
+
+```text
+Branch
+ ├── Users
+ ├── Stores
+ ├── Purchase Orders
+ ├── Sales Invoices
+ ├── Payments
+ ├── Expenses
+ └── Stock Transactions
+
+Medicine
+ ├── Medicine Batches
+ ├── Purchase Items
+ ├── Sales Items
+ ├── Prescription Items
+ └── Stock Locations
+
+Doctor
+ ├── Prescriptions
+ ├── Sales Invoices
+ ├── Doctor Accounts
+ └── Doctor Commission Ledger
+
+Supplier/Vendor
+ ├── Purchase Orders
+ ├── Purchase Returns
+ └── Vendor Ledger
+
+Customer
+ ├── Prescriptions
+ ├── Sales Invoices
+ └── Online Orders
+
+Ledger Transactions
+ ├── Purchase
+ ├── Sales
+ ├── Returns
+ ├── Payments
+ ├── Expenses
+ ├── Doctor Commission
+ └── Vendor Transactions
+```
+
+### Estimated Tables: 40+
+
+### Architecture: Enterprise ERP Style
+
+### Ready For:
+
+✅ Pharmacy Chain
+✅ Multi Branch
+✅ Doctor Commission
+✅ Rack/Shelf Inventory
+✅ Online Orders
+✅ GST (CGST/SGST)
+✅ Ledger Accounting
+✅ Audit Trail
+✅ Future Mobile App
+✅ Future Franchise Model
+✅ Cloud Deployment
+✅ High Volume Billing (1M+ Invoices)

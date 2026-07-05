@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:
+  # Database Configuration
+  datasource:
+    url: jdbc:mysql://localhost:3306/pharmacy?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # JPA & Hibernate Configuration
+  jpa:
+    hibernate:
+      # 'update' automatically updates the schema if you change your Java Entities.
+      # Change to 'none' or 'validate' in production.
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+# Custom Application Properties for JWT Authentication
+app:
+  jwt:
+    # This is a generated 256-bit secure key.
+    # In production, move this to environment variables.
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    # Token expiration time in milliseconds (86400000 = 1 day)
+    expiration: 60000
+
+# Logging Configuration (Optional but highly recommended for debugging)
+logging:
+  level:
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
